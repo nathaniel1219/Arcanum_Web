@@ -67,8 +67,8 @@ class CartComponent extends Component
         foreach ($this->quantities as $id => $qty) {
             $qty = max(1, (int)$qty);
             CartItem::where('cart_id', $cart->id)
-                ->where('id', $id)
-                ->update(['quantity' => $qty]);
+            ->where('product_id', $id)
+            ->update(['quantity' => $qty]);
         }
 
         $this->loadCart();
@@ -88,8 +88,8 @@ class CartComponent extends Component
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
 
         CartItem::where('cart_id', $cart->id)
-            ->whereIn('id', $this->selected)
-            ->delete();
+        ->whereIn('product_id', $this->selected)
+        ->delete();
 
         $this->selected = [];
         $this->loadCart();
@@ -101,18 +101,21 @@ class CartComponent extends Component
         $user = Auth::user();
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
 
-        $cartItem = CartItem::firstOrCreate([
-            'cart_id' => $cart->id,
-            'product_id' => $productId,
-        ]);
-
-        // If already exists, increase quantity
-        $cartItem->quantity += 1;
-        $cartItem->save();
+        // Use updateOrCreate with raw increment to avoid race conditions
+        $cartItem = CartItem::updateOrCreate(
+            [
+                'cart_id' => $cart->id,
+                'product_id' => $productId,
+            ],
+            [
+                'quantity' => \DB::raw('quantity + 1'),
+            ]
+        );
 
         $this->dispatchBrowserEvent('toast', ['message' => 'Added to cart!']);
-        $this->loadCart(); // refresh cart for any cart page listeners
+        $this->loadCart(); // refresh cart for cart page listeners
     }
+
 
 
     public function render()
