@@ -27,14 +27,14 @@ class ProductController extends Controller
     // Yu-Gi-Oh only
     public function ygo()
     {
-        $products = Product::where('sub_category', 'ygo')->get();
+        $products = Product::where('sub_category', 'Yu-Gi-Oh')->get();
         return view('products.ygo', compact('products'));
     }
 
     // Funko only
     public function funko()
     {
-        $products = Product::where('sub_category', 'funko')->get();
+        $products = Product::where('sub_category', 'Funko Pop')->get();
         return view('products.funko', compact('products'));
     }
 

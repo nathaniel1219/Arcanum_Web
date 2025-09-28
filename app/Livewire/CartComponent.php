@@ -154,4 +154,18 @@ class CartComponent extends Component
 
         $this->dispatch('toast', message: 'Checkout not implemented yet');
     }
+
+    public function toggleSelectAll()
+    {
+        if ($this->selectAll) {
+            $this->selected = $this->items->pluck('id')->toArray();
+        } else {
+            $this->selected = [];
+        }
+
+        // 🔑 Force re-render so checkboxes visually update
+        $this->dispatch('$refresh');
+    }
+
+
 }
