@@ -35,6 +35,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -47,6 +48,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+
     protected $appends = [
         'profile_photo_url',
     ];
@@ -56,6 +58,7 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+
     protected function casts(): array
     {
         return [
@@ -63,6 +66,17 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /* A new cart is created when user is created */
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            \App\Models\Cart::create([
+                'user_id' => $user->id,
+            ]);
+        });
+    }
+
 
     public function cart()
     {

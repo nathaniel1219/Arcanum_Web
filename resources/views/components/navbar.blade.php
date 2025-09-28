@@ -18,8 +18,8 @@
                 </x-nav-link>
             </li>
             <li>
-                <x-nav-link :href="url('/tcg')" :active="request()->is('tcg')">
-                    TCG
+                <x-nav-link :href="url('/ygo')" :active="request()->is('ygo')">
+                    Yu-Gi-Oh
                 </x-nav-link>
             </li>
             <li>

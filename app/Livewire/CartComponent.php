@@ -3,123 +3,155 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\Cart;
-use App\Models\CartItem;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
+use App\Models\Cart;
 
 class CartComponent extends Component
 {
-    public Collection $items;
-    public array $selected = [];          // array of product_ids selected
-    public array $quantities = [];
-    public float $subtotal = 0.0;
-
+    // Livewire listeners — when AddToCartButton emits 'cartUpdated' we reload items
     protected $listeners = [
-        'cartUpdated' => 'refreshCart',    // fired when item added from modal
-        'toggleSelectAll' => 'toggleSelectAll',
-        'addToCart' => 'addToCart'
+        'cartUpdated' => 'loadItems',
     ];
+
+    public $cart;
+    public $items;
+    public $selected = [];
+    public $selectAll = false;
 
     public function mount()
     {
-        $this->loadCart();
+        if (! Auth::check()) {
+            abort(403);
+        }
+
+        $this->cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
+        $this->loadItems();
     }
 
-    public function loadCart()
+    public function loadItems()
     {
-        $user = Auth::user();
-        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-        $this->items = $cart->cartItems()->with('product')->get();
-        $this->quantities = [];
-        $this->selected = [];
-        $this->subtotal = 0;
+        $this->items = $this->cart->items()->with('product')->get();
 
-        foreach ($this->items as $it) {
-            $this->quantities[$it->product_id] = $it->quantity;
-            $this->subtotal += ($it->product->price ?? 0) * $it->quantity;
+        if (! empty($this->selected)) {
+            $available = $this->items->pluck('id')->map(fn($v) => (string) $v)->toArray();
+            $this->selected = array_values(array_intersect($this->selected, $available));
+            if (empty($this->selected)) {
+                $this->selectAll = false;
+            }
         }
     }
 
-    // Re-fetch items
-    public function refreshCart()
+    public function render()
     {
-        $this->loadCart();
+        return view('livewire.cart-component', [
+            'items' => $this->items,
+            'subtotal' => $this->getSubtotal(),
+            'selectedTotal' => $this->getSelectedTotal(),
+        ]);
     }
 
-    // Toggle select all (called from browser event)
-    public function toggleSelectAll($checked)
+    public function increment($itemId)
     {
-        if ($checked) {
-            $this->selected = $this->items->pluck('product_id')->map(fn($v) => (string)$v)->toArray();
+        $item = $this->cart->items()->where('id', $itemId)->first();
+        if (! $item) return;
+
+        $item->increment('quantity');
+        $this->loadItems();
+        $this->dispatch('toast', message: 'Quantity increased');
+    }
+
+    public function decrement($itemId)
+    {
+        $item = $this->cart->items()->where('id', $itemId)->first();
+        if (! $item) return;
+
+        if ($item->quantity <= 1) {
+            $this->dispatch('toast', message: 'Quantity cannot be less than 1');
+            return;
+        }
+
+        $item->decrement('quantity');
+        $this->loadItems();
+        $this->dispatch('toast', message: 'Quantity decreased');
+    }
+
+    public function updateQuantity($itemId, $quantity)
+    {
+        $qty = (int) $quantity;
+        if ($qty < 1) $qty = 1;
+
+        $item = $this->cart->items()->where('id', $itemId)->first();
+        if (! $item) return;
+
+        $item->quantity = $qty;
+        $item->save();
+
+        $this->loadItems();
+        $this->dispatch('toast', message: 'Quantity updated');
+    }
+
+    public function removeItem($itemId)
+    {
+        $item = $this->cart->items()->where('id', $itemId)->first();
+        if (! $item) return;
+
+        $item->delete();
+        $this->loadItems();
+        $this->dispatch('toast', message: 'Item removed');
+    }
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selected = $this->items->pluck('id')->map(fn($id) => (string) $id)->toArray();
         } else {
             $this->selected = [];
         }
     }
 
-    // Update quantities from $quantities array
-    public function updateQuantities()
-    {
-        $user = Auth::user();
-        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-
-        foreach ($this->quantities as $id => $qty) {
-            $qty = max(1, (int)$qty);
-            CartItem::where('cart_id', $cart->id)
-            ->where('product_id', $id)
-            ->update(['quantity' => $qty]);
-        }
-
-        $this->loadCart();
-        $this->dispatchBrowserEvent('toast', ['message' => 'Cart updated']);
-    }
-
-
-    // Delete selected items
-    public function deleteSelected()
+    public function removeSelected()
     {
         if (empty($this->selected)) {
-            $this->dispatchBrowserEvent('toast', ['message' => 'No items selected']);
+            $this->dispatch('toast', message: 'No items selected');
             return;
         }
 
-        $user = Auth::user();
-        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-
-        CartItem::where('cart_id', $cart->id)
-        ->whereIn('product_id', $this->selected)
-        ->delete();
+        DB::transaction(function () {
+            $this->cart->items()->whereIn('id', $this->selected)->delete();
+        });
 
         $this->selected = [];
-        $this->loadCart();
-        $this->dispatchBrowserEvent('toast', ['message' => 'Selected items deleted']);
+        $this->selectAll = false;
+        $this->loadItems();
+        $this->dispatch('toast', message: 'Selected items removed');
     }
 
-    public function addToCart($productId)
+    public function getSubtotal()
     {
-        $user = Auth::user();
-        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        if ($this->items->isEmpty()) return 0;
 
-        // Use updateOrCreate with raw increment to avoid race conditions
-        $cartItem = CartItem::updateOrCreate(
-            [
-                'cart_id' => $cart->id,
-                'product_id' => $productId,
-            ],
-            [
-                'quantity' => \DB::raw('quantity + 1'),
-            ]
-        );
-
-        $this->dispatchBrowserEvent('toast', ['message' => 'Added to cart!']);
-        $this->loadCart(); // refresh cart for cart page listeners
+        return $this->items->sum(function ($item) {
+            $price = optional($item->product)->price ?? 0;
+            return $price * $item->quantity;
+        });
     }
 
-
-
-    public function render()
+    public function getSelectedTotal()
     {
-        return view('livewire.cart-component');
+        if (empty($this->selected) || $this->items->isEmpty()) return 0;
+
+        return $this->items->whereIn('id', $this->selected)
+                    ->sum(fn($item) => (optional($item->product)->price ?? 0) * $item->quantity);
+    }
+
+    public function proceedToCheckout()
+    {
+        if (empty($this->selected)) {
+            $this->dispatch('toast', message: 'Please select at least one item');
+            return;
+        }
+
+        $this->dispatch('toast', message: 'Checkout not implemented yet');
     }
 }

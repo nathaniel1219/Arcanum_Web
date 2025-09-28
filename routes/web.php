@@ -5,7 +5,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Livewire\PaymentComponent;
 
-
 /*
 |--------------------------------------------------------------------------
 | Authenticated routes (everything requires login)
@@ -13,8 +12,11 @@ use App\Livewire\PaymentComponent;
 */
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Home (product listing)
+    // Product listings
     Route::get('/', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/pokemon', [ProductController::class, 'pokemon'])->name('products.pokemon');
+    Route::get('/ygo', [ProductController::class, 'ygo'])->name('products.ygo');
+    Route::get('/funko', [ProductController::class, 'funko'])->name('products.funko');
 
     // Product details
     Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
@@ -22,13 +24,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cart page (blade that includes the Livewire component)
     Route::view('/cart', 'cart')->name('cart.index');
     
-    // Add to cart (AJAX)
-    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
-
     // Payment (Livewire)
     Route::get('/payment', PaymentComponent::class)->name('payment');
 
-    // Dashboard redirect back to products.index (optional)
+    // Dashboard (redirect)
     Route::get('/dashboard', function () {
         return redirect()->route('products.index');
     })->name('dashboard');
@@ -36,9 +35,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Guest routes
-| (Jetstream/Fortify usually provides the login/register routes for you;
-|  if you've published views, those will be used. No need to manually
-|  expose product pages here because everything above is auth-protected.)
+| Guest routes are provided by Jetstream/Fortify - they handle login/register
 |--------------------------------------------------------------------------
 */

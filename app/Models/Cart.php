@@ -23,10 +23,4 @@ class Cart extends Model
     {
         return $this->hasMany(CartItem::class);
     }
-
-    // Alias used by your Livewire component
-    public function cartItems()
-    {
-        return $this->items();
-    }
 }

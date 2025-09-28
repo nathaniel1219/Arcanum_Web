@@ -17,6 +17,27 @@ class ProductController extends Controller
         return view('products.index', compact('products'));
     }
 
+    // Pokemon only
+    public function pokemon()
+    {
+        $products = Product::where('sub_category', 'pokemon')->get();
+        return view('products.pokemon', compact('products'));
+    }
+
+    // Yu-Gi-Oh only
+    public function ygo()
+    {
+        $products = Product::where('sub_category', 'ygo')->get();
+        return view('products.ygo', compact('products'));
+    }
+
+    // Funko only
+    public function funko()
+    {
+        $products = Product::where('sub_category', 'funko')->get();
+        return view('products.funko', compact('products'));
+    }
+
     // Show single product detail
     public function show($id)
     {

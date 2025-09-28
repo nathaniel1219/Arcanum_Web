@@ -4,10 +4,10 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    {{-- Hero Section --}}
+        {{-- Hero Section --}}
     <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold mb-2">Discover Rare Collectibles</h1>
-        <p class="text-gray-600 text-lg">Explore, buy, and bid on exclusive items from Arcanum Vault</p>
+        <h1 class="text-4xl font-bold mb-2">Discover Rare Funko Pops</h1>
+        <p class="text-gray-600 text-lg">Explore, and buy exclusive items from Arcanum</p>
     </div>
 
     {{-- Product Grid --}}

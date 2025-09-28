@@ -32,18 +32,19 @@
                 </p>
                 <p class="text-sm text-gray-400 mb-6">{{ $product->sub_category }}</p>
 
-                <!-- Quantity Input -->
-                <div class="flex items-center gap-3 mb-4">
-                    <label for="quantity-{{ $index }}" class="font-semibold">Quantity:</label>
-                    <input type="number" id="quantity-{{ $index }}" min="1" value="1"
-                        class="w-20 border rounded px-2 py-1 text-center">
-                </div>
+                {{-- Add-to-cart Livewire component (replaces raw button + input) --}}
+                <livewire:add-to-cart-button :product-id="$product->id" :index="$index" />
 
-                <!-- Add to Cart Button -->
-                <button wire:click="$emit('addToCart', {{ $product->product_id }})"
-                    class="w-full bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600">
-                    Add to Cart
-                </button>
+                {{-- Close-modal listener so Livewire can close the modal when it dispatches closeModal --}}
+                <script>
+                    window.addEventListener('closeModal', (e) => {
+                        if (e.detail?.index === {{ $index }}) {
+                            closeModal({{ $index }});
+                        }
+                    });
+                </script>
+
+
 
             </div>
         </div>
