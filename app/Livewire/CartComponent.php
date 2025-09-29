@@ -152,11 +152,13 @@ class CartComponent extends Component
             return;
         }
 
-        // Redirect properly in Livewire v3
-        return redirect()->route('checkout.index', [
-            'selected' => implode(',', $this->selected)
-        ]);
+        // Store selected IDs in session
+        session(['checkout_items' => $this->selected]);
+
+        // Redirect to checkout
+        return redirect()->route('checkout.index');
     }
+
 
     public function toggleSelectAll()
     {
@@ -165,9 +167,6 @@ class CartComponent extends Component
         } else {
             $this->selected = [];
         }
-
-        // 🔑 Force re-render so checkboxes visually update
-        $this->dispatch('$refresh');
     }
 
 
