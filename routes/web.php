@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CheckoutController;
-use App\Livewire\PaymentComponent;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,9 +28,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.place');
     Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 
-
-    // Payment (Livewire)
-    Route::get('/payment', PaymentComponent::class)->name('payment');
+    // Profile page
+    Route::get('/profile', function () {
+        return view('profile.show');
+    })->name('profile.show');
 
     // Dashboard (redirect)
     Route::get('/dashboard', function () {
