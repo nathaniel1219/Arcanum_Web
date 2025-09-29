@@ -6,10 +6,8 @@
 
         {{-- Select all --}}
         <div class="flex items-center mb-4">
-            <input type="checkbox" id="select-all"
-                   wire:model="selectAll"
-                   wire:click="toggleSelectAll"
-                   class="mr-2 rounded-full">
+            <input type="checkbox" id="select-all" wire:model="selectAll" wire:click="toggleSelectAll"
+                class="mr-2 rounded-full">
             <label for="select-all" class="text-sm text-gray-700">Select All</label>
         </div>
 
@@ -23,15 +21,12 @@
                     <div class="flex justify-between items-center border p-4 rounded shadow-sm bg-white">
                         <div class="flex items-center gap-4">
                             {{-- ✅ Checkbox inside foreach --}}
-                            <input type="checkbox"
-                                   value="{{ $item->id }}"
-                                   wire:model="selected"
-                                   @checked(in_array($item->id, $selected))
-                                   class="checkbox-item rounded-full">
+                            <input type="checkbox" value="{{ $item->id }}" wire:model="selected"
+                                class="checkbox-item rounded-full">
 
                             <img src="{{ asset('images/products/' . ($item->product->image_url ?? 'placeholder.png')) }}"
-                                 alt="{{ $item->product->product_name ?? 'Product' }}"
-                                 class="w-20 h-20 object-cover rounded">
+                                alt="{{ $item->product->product_name ?? 'Product' }}"
+                                class="w-20 h-20 object-cover rounded">
 
                             <div>
                                 <p class="font-semibold">{{ $item->product->product_name ?? 'Unknown product' }}</p>
@@ -45,16 +40,14 @@
                         <div class="flex flex-col items-end">
                             <div class="flex items-center gap-2">
                                 <button type="button" wire:click="decrement({{ $item->id }})"
-                                        class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">-</button>
+                                    class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">-</button>
 
-                                <input type="number"
-                                       min="1"
-                                       value="{{ $item->quantity }}"
-                                       wire:change="updateQuantity({{ $item->id }}, $event.target.value)"
-                                       class="w-20 border rounded px-2 py-1 text-center">
+                                <input type="number" min="1" value="{{ $item->quantity }}"
+                                    wire:change="updateQuantity({{ $item->id }}, $event.target.value)"
+                                    class="w-20 border rounded px-2 py-1 text-center">
 
                                 <button type="button" wire:click="increment({{ $item->id }})"
-                                        class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">+</button>
+                                    class="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">+</button>
                             </div>
 
                             <p class="text-gray-700 font-semibold mt-2">
@@ -63,7 +56,7 @@
 
                             <div class="mt-2">
                                 <button type="button" wire:click="removeItem({{ $item->id }})"
-                                        class="text-red-500 text-sm hover:underline">Remove</button>
+                                    class="text-red-500 text-sm hover:underline">Remove</button>
                             </div>
                         </div>
                     </div>
@@ -72,7 +65,7 @@
 
             <div class="mt-6 flex justify-between">
                 <button type="button" wire:click="removeSelected"
-                        class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
                     Delete Selected
                 </button>
                 {{-- Removed manual refresh button --}}
@@ -99,11 +92,16 @@
             <span class="text-[#F4B14E]">LKR {{ number_format($selectedTotal, 2) }}</span>
         </div>
 
-        <button type="button"
-                wire:click="proceedToCheckout"
-                @if ($selectedTotal <= 0) disabled @endif
-                class="w-full mt-6 bg-[#F4B14E] text-white py-2 rounded hover:bg-yellow-600 disabled:opacity-50">
+        <button type="button" wire:click="proceedToCheckout" @if ($selectedTotal <= 0) disabled @endif
+            class="w-full mt-6 bg-[#F4B14E] text-white py-2 rounded hover:bg-yellow-600 disabled:opacity-50">
             Proceed to Checkout
         </button>
     </aside>
 </div>
+
+<script>
+    // Listen for the event emitted by the Livewire component and do a plain redirect
+    Livewire.on('redirectToCheckout', url => {
+        window.location.href = url;
+    });
+</script>

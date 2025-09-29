@@ -152,7 +152,10 @@ class CartComponent extends Component
             return;
         }
 
-        $this->dispatch('toast', message: 'Checkout not implemented yet');
+        // Redirect properly in Livewire v3
+        return redirect()->route('checkout.index', [
+            'selected' => implode(',', $this->selected)
+        ]);
     }
 
     public function toggleSelectAll()
