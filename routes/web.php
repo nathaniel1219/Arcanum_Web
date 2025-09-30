@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return redirect()->route('products.index');
     })->name('dashboard');
 });
+
+/* for admins */
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/users', [AdminController::class, 'showUsers'])->name('admin.users');
+    Route::post('/orders/{id}/update', [AdminController::class, 'updateOrder'])->name('admin.orders.update');
+    Route::get('/products', [AdminController::class, 'addProduct'])->name('admin.products');
+    Route::post('/products/store', [AdminController::class, 'storeProduct'])->name('admin.products.store');
+});
+
 
 /*
 |--------------------------------------------------------------------------

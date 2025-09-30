@@ -32,6 +32,11 @@
         {{-- Right-side icons --}}
         <div class="flex items-center space-x-4">
             @auth
+                {{-- Admin Panel Link --}}
+                @if (auth()->user()->is_admin)
+                    <a href="{{ route('admin.users') }}" class="btn btn-primary">Admin Panel</a>
+                @endif
+
                 {{-- Profile icon --}}
                 <a href="{{ route('profile.show') }}" class="text-gray-700 hover:text-yellow-500">
                     <img src="{{ asset('images/icons/account.svg') }}" alt="Profile" class="h-6 w-6">
