@@ -37,10 +37,17 @@
                     <a href="{{ route('admin.users') }}" class="btn btn-primary">Admin Panel</a>
                 @endif
 
+                {{-- Orders icon --}}
+                <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-yellow-500">
+                    My Orders
+                </a>
+
+
                 {{-- Profile icon --}}
                 <a href="{{ route('profile.show') }}" class="text-gray-700 hover:text-yellow-500">
                     <img src="{{ asset('images/icons/account.svg') }}" alt="Profile" class="h-6 w-6">
                 </a>
+
 
                 {{-- Cart icon --}}
                 <a href="{{ url('/cart') }}" class="text-gray-700 hover:text-yellow-500">

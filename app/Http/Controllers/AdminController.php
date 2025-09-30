@@ -10,19 +10,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\File;
-use App\Services\MongoService;
 
 class AdminController extends Controller
 {
-    protected $mongo;
-
-    public function __construct(MongoService $mongo)
+    public function __construct()
     {
         if (!Auth::check() || !Auth::user()->isAdmin()) {
             abort(403, 'Unauthorized');
         }
-
-        $this->mongo = $mongo;
     }
 
     // Show users with orders
@@ -42,15 +37,6 @@ class AdminController extends Controller
         $order = Order::findOrFail($id);
         $order->order_status = $request->order_status;
         $order->save();
-
-        // Log to MongoDB with proper UTCDateTime
-        $this->mongo->insert('order_logs', [
-            'order_id' => $order->id,
-            'user_id' => $order->user_id,
-            'new_status' => $order->order_status,
-            'updated_by' => Auth::id(),
-            'updated_at' => MongoService::nowForMongo(),
-        ]);
 
         return redirect()->back()->with('success', 'Order status updated.');
     }
@@ -92,7 +78,7 @@ class AdminController extends Controller
             $file->move($destination, $imageFilename);
         }
 
-        $product = Product::create([
+        Product::create([
             'product_name' => $request->input('product_name'),
             'description'  => $request->input('description'),
             'price'        => $request->input('price'),
@@ -100,17 +86,6 @@ class AdminController extends Controller
             'sub_category' => $request->input('sub_category'),
             'image_url'    => $imageFilename,
             'details'      => $request->input('details'),
-        ]);
-
-        // Log product creation to MongoDB
-        $this->mongo->insert('product_logs', [
-            'product_id'   => $product->id,
-            'name'         => $product->product_name,
-            'category'     => $product->category,
-            'sub_category' => $product->sub_category,
-            'price'        => $product->price,
-            'created_by'   => Auth::id(),
-            'created_at'   => MongoService::nowForMongo(),
         ]);
 
         return redirect()->route('admin.users')->with('success', 'Product added successfully.');
@@ -130,79 +105,14 @@ class AdminController extends Controller
 
         $product->delete();
 
-        // Log deletion
-        $this->mongo->insert('product_logs', [
-            'product_id' => $id,
-            'deleted_by' => Auth::id(),
-            'deleted_at' => MongoService::nowForMongo(),
-        ]);
-
         return redirect()->route('admin.products')->with('success', 'Product deleted successfully.');
     }
 
-    // Show MongoDB logs (both order and product logs)
+    // Show logs placeholder (Mongo removed)
     public function showLogs()
     {
-        // Fetch raw MongoDB logs
-        $orderLogsRaw = $this->mongo->collection('order_logs')
-            ->find([], ['sort' => ['updated_at' => -1]])
-            ->toArray();
-
-        $productLogsRaw = $this->mongo->collection('product_logs')
-            ->find([], ['sort' => ['created_at' => -1]])
-            ->toArray();
-
-        // Helper function to safely parse MongoDB date fields
-        $parseMongoDate = function ($field) {
-            if (is_array($field)) {
-                if (isset($field['$date'])) {
-                    // Sometimes $date is numeric (milliseconds) or a string
-                    if (is_numeric($field['$date'])) {
-                        return date('Y-m-d H:i:s', $field['$date'] / 1000);
-                    } elseif (is_string($field['$date'])) {
-                        return date('Y-m-d H:i:s', strtotime($field['$date']));
-                    }
-                }
-                // If the array itself contains '$date' nested further, flatten
-                foreach ($field as $sub) {
-                    if (is_array($sub) && isset($sub['$date'])) {
-                        if (is_numeric($sub['$date'])) {
-                            return date('Y-m-d H:i:s', $sub['$date'] / 1000);
-                        } elseif (is_string($sub['$date'])) {
-                            return date('Y-m-d H:i:s', strtotime($sub['$date']));
-                        }
-                    }
-                }
-                // Last fallback: cannot parse, return empty
-                return '';
-            } elseif (is_numeric($field)) {
-                // Numeric timestamps (milliseconds)
-                return date('Y-m-d H:i:s', $field / 1000);
-            } elseif (is_string($field)) {
-                // Already a string datetime
-                return date('Y-m-d H:i:s', strtotime($field));
-            }
-
-            return '';
-        };
-
-        // Format order logs
-        $orderLogs = array_map(function ($doc) use ($parseMongoDate) {
-            $doc = json_decode(json_encode($doc), true);
-            $doc['updated_at'] = $parseMongoDate($doc['updated_at'] ?? '');
-            return $doc;
-        }, $orderLogsRaw);
-
-        // Format product logs
-        $productLogs = array_map(function ($doc) use ($parseMongoDate) {
-            $doc = json_decode(json_encode($doc), true);
-            $doc['created_at'] = $parseMongoDate($doc['created_at'] ?? '');
-            $doc['deleted_at'] = $parseMongoDate($doc['deleted_at'] ?? '');
-            return $doc;
-        }, $productLogsRaw);
-
-        return view('admin.logs', compact('orderLogs', 'productLogs'));
+        // Since MongoDB logs are removed, this could either show nothing
+        // or you could implement a MySQL-based log table in the future
+        return view('admin.logs');
     }
-
-
 }

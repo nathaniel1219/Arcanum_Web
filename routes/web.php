@@ -5,7 +5,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OrderController;
-use App\Services\MongoService;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,21 +25,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cart page (blade that includes the Livewire component)
     Route::view('/cart', 'cart')->name('cart.index');
 
-    //checkout page routes
+    // Checkout page routes
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.place');
     Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 
-    // Profile page
-     Route::get('/profile', [OrderController::class, 'index'])->name('profile.show');
+    // Orders page (your custom controller)
+    Route::get('/my-orders', [OrderController::class, 'index'])->name('orders.index');
 
     // Dashboard (redirect)
     Route::get('/dashboard', function () {
         return redirect()->route('products.index');
     })->name('dashboard');
+
+    // Profile page is handled automatically by Jetstream — do not override
 });
 
-/* for admins */
+/* For admins */
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/users', [AdminController::class, 'showUsers'])->name('admin.users');
     Route::post('/orders/{id}/update', [AdminController::class, 'updateOrder'])->name('admin.orders.update');
@@ -50,5 +51,4 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::delete('/products/{id}/delete', [AdminController::class, 'deleteProduct'])->name('admin.products.delete');
 
     Route::get('/logs', [AdminController::class, 'showLogs'])->name('admin.logs');
-
 });
