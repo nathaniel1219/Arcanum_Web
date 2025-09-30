@@ -9,6 +9,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\File; 
 
 
 class AdminController extends Controller
@@ -44,12 +45,16 @@ class AdminController extends Controller
     // Show form to add product
     public function addProduct()
     {
-        // Provide options so view can build selects
         $categories = ['TCG', 'Figures'];
         $subCategories = ['pokemon', 'Yu-Gi-Oh', 'Funko Pop'];
 
-        return view('admin.add-product', compact('categories', 'subCategories'));
+        // Fetch all products to display in sidebar
+        $products = Product::all();
+
+        // Pass products to the view
+        return view('admin.add-product', compact('categories', 'subCategories', 'products'));
     }
+
 
     // Store product
     public function storeProduct(Request $request)
@@ -98,5 +103,23 @@ class AdminController extends Controller
         ]);
 
         return redirect()->route('admin.users')->with('success', 'Product added successfully.');
+    }
+
+    //Delete product (not linked to cart/order items)
+    public function deleteProduct($id)
+    {
+        $product = Product::findOrFail($id);
+
+        // Delete image file if exists
+        if ($product->image_url) {
+            $path = public_path('images/products/' . $product->image_url);
+            if (File::exists($path)) {
+                File::delete($path);
+            }
+        }
+
+        $product->delete();
+
+        return redirect()->route('admin.products')->with('success', 'Product deleted successfully.');
     }
 }
