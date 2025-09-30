@@ -46,6 +46,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/orders/{id}/update', [AdminController::class, 'updateOrder'])->name('admin.orders.update');
     Route::get('/products', [AdminController::class, 'addProduct'])->name('admin.products');
     Route::post('/products/store', [AdminController::class, 'storeProduct'])->name('admin.products.store');
+    Route::get('/products/create', [AdminController::class, 'addProduct'])->name('admin.products.create');
 });
 
 

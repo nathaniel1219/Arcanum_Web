@@ -9,8 +9,10 @@ class Product extends Model
 {
     use HasFactory;
 
+    protected $table = 'products';
     protected $fillable = [
-        'product_name', 'description', 'price', 'category', 'sub_category', 'image_url', 'details'
+        'product_name', 'description', 'price',
+        'category', 'sub_category', 'image_url', 'details'
     ];
 
     // Product belongs to many cart items
