@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\OrderController;
 use App\Services\MongoService;
 
 /*
@@ -31,9 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 
     // Profile page
-    Route::get('/profile', function () {
-        return view('profile.show');
-    })->name('profile.show');
+     Route::get('/profile', [OrderController::class, 'index'])->name('profile.show');
 
     // Dashboard (redirect)
     Route::get('/dashboard', function () {
@@ -53,12 +52,3 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/logs', [AdminController::class, 'showLogs'])->name('admin.logs');
 
 });
-
-
-
-
-/*
-|--------------------------------------------------------------------------
-| Guest routes are provided by Jetstream/Fortify - they handle login/register
-|--------------------------------------------------------------------------
-*/

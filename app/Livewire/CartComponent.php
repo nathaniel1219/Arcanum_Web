@@ -159,6 +159,8 @@ class CartComponent extends Component
         return redirect()->route('checkout.index');
     }
 
+    
+
 
     public function toggleSelectAll()
     {
