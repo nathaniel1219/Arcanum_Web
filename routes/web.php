@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AdminController;
+use App\Services\MongoService;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,7 +49,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/products/store', [AdminController::class, 'storeProduct'])->name('admin.products.store');
     Route::get('/products/create', [AdminController::class, 'addProduct'])->name('admin.products.create');
     Route::delete('/products/{id}/delete', [AdminController::class, 'deleteProduct'])->name('admin.products.delete');
+
+    Route::get('/logs', [AdminController::class, 'showLogs'])->name('admin.logs');
+
 });
+
+
 
 
 /*

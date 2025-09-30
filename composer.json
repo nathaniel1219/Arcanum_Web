@@ -14,6 +14,7 @@
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.6",
         "mongodb/laravel-mongodb": "^5.5",
+        "mongodb/mongodb": "^2.1",
         "usernotnull/tall-toasts": "^2.2"
     },
     "require-dev": {
