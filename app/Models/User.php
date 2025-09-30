@@ -84,8 +84,6 @@ class User extends Authenticatable
         return $this->is_admin;
     }
 
-
-
     public function cart()
     {
         return $this->hasOne(Cart::class); // one cart per user
