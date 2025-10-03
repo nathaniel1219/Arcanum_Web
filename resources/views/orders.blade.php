@@ -26,8 +26,7 @@
                             <td class="px-4 py-2 border">{{ $order->order_date }}</td>
                             <td class="px-4 py-2 border">
                                 @foreach ($order->orderItems ?? [] as $item)
-                                    <div>{!! $item->product->product_name ?? 'Unnamed Product' !!} x {{ $item->quantity }}</div>
-
+                                    <div>{{ $item->product->product_name ?? 'Unnamed Product' }} x {{ $item->quantity }}</div>
                                 @endforeach
 
                             </td>
