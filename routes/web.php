@@ -6,11 +6,9 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OrderController;
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated routes (everything requires login)
-|--------------------------------------------------------------------------
-*/
+
+// Authenticated routes (everything requires login)
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Product listings
@@ -38,7 +36,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return redirect()->route('products.index');
     })->name('dashboard');
 
-    // Profile page is handled automatically by Jetstream — do not override
 });
 
 /* For admins */
@@ -49,6 +46,5 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/products/store', [AdminController::class, 'storeProduct'])->name('admin.products.store');
     Route::get('/products/create', [AdminController::class, 'addProduct'])->name('admin.products.create');
     Route::delete('/products/{id}/delete', [AdminController::class, 'deleteProduct'])->name('admin.products.delete');
-
     Route::get('/logs', [AdminController::class, 'showLogs'])->name('admin.logs');
 });

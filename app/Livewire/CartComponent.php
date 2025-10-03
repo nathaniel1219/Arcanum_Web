@@ -9,7 +9,8 @@ use App\Models\Cart;
 
 class CartComponent extends Component
 {
-    // Livewire listeners — when AddToCartButton emits 'cartUpdated' we reload items
+    // Livewire listeners 
+    
     protected $listeners = [
         'cartUpdated' => 'loadItems',
     ];
