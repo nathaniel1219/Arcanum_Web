@@ -11,6 +11,32 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
+    // egister: new user
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed'
+        ]);
+
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password)
+        ]);
+
+        // auto-login after register
+        $token = $user->createToken('mobile-app-token')->plainTextToken;
+
+        return response()->json([
+            'message'      => 'Registration successful',
+            'access_token' => $token,
+            'token_type'   => 'Bearer',
+            'user'         => $user
+        ], 201);
+    }
+
     // Login: return token to mobile
     public function login(Request $request)
     {
@@ -41,7 +67,7 @@ class AuthController extends Controller
         $token = $request->user()->currentAccessToken();
 
         if ($token) {
-            $token->delete(); // IDE now recognizes delete()
+            $token->delete();
             return response()->json(['message' => 'Logged out']);
         }
 
