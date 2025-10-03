@@ -11,7 +11,7 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    // egister: new user
+    // Register: new user
     public function register(Request $request)
     {
         $request->validate([

@@ -7,15 +7,14 @@ use App\Models\Product;
 
 class ProductController extends Controller
 {
-    // Show all products on homepage
+    //  to load all products on homepage
     public function index()
     {
-        // Fetch all products from database
         $products = Product::all();
 
-        // Pass products to view
         return view('products.index', compact('products'));
     }
+
 
     // Pokemon only
     public function pokemon()
