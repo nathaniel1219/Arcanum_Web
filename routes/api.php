@@ -19,12 +19,14 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    // Product APIs
+    
+});
+
+// Product APIs
     Route::get('/products', [ProductApiController::class, 'index']);
     Route::get('/products/pokemon', [ProductApiController::class, 'pokemon']);
     Route::get('/products/ygo', [ProductApiController::class, 'ygo']);
     Route::get('/products/funko', [ProductApiController::class, 'funko']);
     Route::get('/products/{id}', [ProductApiController::class, 'show']);
-});
 
 
